@@ -9,9 +9,9 @@ import (
 )
 
 type Config struct {
-	Mode           string `yaml:"mode" env-default:"local" env-required:"true"`
-	HTTPServer     string `yaml:"http_server"`
-	DataSourceName string `yaml:"data_source_name" env-required:"true"`
+	Mode           string     `yaml:"mode" env-default:"local" env-required:"true"`
+	HTTPServer     HTTPServer `yaml:"http_server"`
+	DataSourceName string     `yaml:"data_source_name" env-required:"true"`
 }
 
 type HTTPServer struct {
@@ -21,6 +21,8 @@ type HTTPServer struct {
 }
 
 func MustCreate() *Config {
+	// TODO: DELETE
+	// os.Setenv("CONFIG_PATH", "../../config/local.yaml")
 
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
@@ -36,7 +38,7 @@ func MustCreate() *Config {
 	var config Config
 	e := cleanenv.ReadConfig(configPath, &config)
 	if e != nil {
-		log.Fatal("package config.MustCreate: cannot read config. Getted error :", e)
+		log.Fatal("package config.MustCreate: cannot read config. Getted error: ", e)
 	}
 
 	return &config
