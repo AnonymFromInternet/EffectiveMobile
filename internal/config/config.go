@@ -22,12 +22,10 @@ type HTTPServer struct {
 
 func MustCreate() *Config {
 	// TODO: DELETE
-	// os.Setenv("CONFIG_PATH", "../../config/local.yaml")
+	os.Setenv("CONFIG_PATH", "../../config/local.yaml")
 
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
-		// TODO: Можно ли уже тут логгировать приложение по разным уровням, хотя логгер еще не загружен?
-		// Хотя наверное нет смысла
 		log.Fatal("package config.MustCreate: cannot get CONFIG_PATH")
 	}
 

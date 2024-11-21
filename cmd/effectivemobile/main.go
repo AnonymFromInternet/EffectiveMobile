@@ -21,7 +21,7 @@ func main() {
 	logger.Info("connection to database was created")
 
 	router := router.New(storage)
-	logger.Info("connection to database was created")
+	logger.Info("router was created")
 
 	server := &http.Server{
 		Addr:         config.Address,
@@ -30,6 +30,7 @@ func main() {
 		ReadTimeout:  config.Timeout,
 		WriteTimeout: config.Timeout,
 	}
+	logger.Info("server started")
 	e := server.ListenAndServe()
 	if e != nil {
 		log.Fatal("package main.main: cannot start server")

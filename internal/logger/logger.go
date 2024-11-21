@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"log"
 	"log/slog"
 	"os"
 )
@@ -8,9 +9,9 @@ import (
 // Levels: error, debug, info
 
 const (
-	LOCAL = "LOCAL"
-	DEBUG = "DEBUG"
-	PROD  = "PROD"
+	LOCAL = "local"
+	DEBUG = "debug"
+	PROD  = "prod"
 )
 
 func MustCreate(mode string) *slog.Logger {
@@ -29,6 +30,10 @@ func MustCreate(mode string) *slog.Logger {
 		} else {
 			logger = slog.New(slog.NewJSONHandler(file, &slog.HandlerOptions{Level: slog.LevelInfo}))
 		}
+	}
+
+	if logger == nil {
+		log.Fatal("logger is not setted")
 	}
 
 	return logger
