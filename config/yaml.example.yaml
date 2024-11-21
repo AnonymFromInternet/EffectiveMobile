@@ -1,9 +1,0 @@
-mode: "local" #local, dev, prod
-
-data_source_name: "user=admin password=admin dbname=postgres_DB host=localhost port=5432 sslmode=disable" # for postgre
-
-http_server:
-  address: "localhost:8082"
-  read_timeout: 4s
-  write_timeout: 4s
-  idle_timeout: 60s
