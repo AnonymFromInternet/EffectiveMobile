@@ -19,19 +19,19 @@ func MustCreate(dataSourceName string, logger *slog.Logger) *Storage {
 	return &Storage{Logger: logger}
 }
 
-func (s *Storage) GetData() error {
-	return nil
+func (s *Storage) GetData() (models.Data, error) {
+	return models.Data{}, nil
 }
 
-func (s *Storage) GetSongText(id int) error {
-	return nil
+func (s *Storage) GetSongText(id int) (string, error) {
+	return "", nil
 }
 
 func (s *Storage) DeleteSong(id int) error {
 	return nil
 }
 
-func ChangeSong(id int, changedSong models.Song) error {
+func (s *Storage) ChangeSong(id int, changedSong models.Song) error {
 	return nil
 }
 

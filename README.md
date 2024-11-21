@@ -6,4 +6,6 @@
 
 #### Then set the variable CONFIG_PATH for path to this file
 
-##### ( By starting the project config file is parsed by path setted in this variable. Otherwise project cannot be run )
+##### ( By starting the project config file is parsed from path setted in this variable. Otherwise project cannot be run )
+
+#### cd to ./cmd/effectivemobile and run via go run .
