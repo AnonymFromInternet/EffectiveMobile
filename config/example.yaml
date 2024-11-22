@@ -1,6 +1,12 @@
 mode: "local" #local, dev, prod
 
-data_source_name: "user=admin password=admin dbname=postgres_DB host=localhost port=5432 sslmode=disable" # for postgre
+data_source_name: "user=your_db_user password=your_db_password dbname=your_db_name host=localhost port=5432 sslmode=disable" # for postgre
+
+external_api_url: "/your_external_api_url"
+
+migrations_paths:
+  up: "your_path_to_up_migrations_dir"
+  down: "your_path_to_down_migrations_dir"
 
 http_server:
   address: "localhost:8082"

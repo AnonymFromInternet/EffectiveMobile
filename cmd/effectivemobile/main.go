@@ -6,21 +6,21 @@ import (
 
 	configPackage "github.com/AnonymFromInternet/EffectiveMobile/internal/config"
 	"github.com/AnonymFromInternet/EffectiveMobile/internal/dataBase/postgre"
-	"github.com/AnonymFromInternet/EffectiveMobile/internal/logger"
+	loggerPackage "github.com/AnonymFromInternet/EffectiveMobile/internal/logger"
 	"github.com/AnonymFromInternet/EffectiveMobile/internal/router"
 )
 
 func main() {
 	config := configPackage.MustCreate()
-	logger := logger.MustCreate(config.Mode)
+	logger := loggerPackage.MustCreate(config.Mode)
 	logger.Info("config was created")
 	logger.Info("logger was created")
 
-	storage := postgre.MustCreate(config.DataSourceName, logger)
+	storage := postgre.MustCreate(config.DataSourceName, logger, config.MigrationsPaths.Up)
 	defer storage.DB.Close()
 	logger.Info("connection to database was created")
 
-	router := router.New(storage)
+	router := router.New(storage, config.ExternalApiUrl, logger)
 	logger.Info("router was created")
 
 	server := &http.Server{

@@ -1,33 +1,32 @@
 package router
 
 import (
+	"log/slog"
+
 	"github.com/AnonymFromInternet/EffectiveMobile/internal/handlers"
 	"github.com/AnonymFromInternet/EffectiveMobile/internal/repository"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func New(storage repository.Repository) *chi.Mux {
+func New(storage repository.Repository, externalApiUrl string, logger *slog.Logger) *chi.Mux {
 	mux := chi.NewMux()
 
 	mux.Use(middleware.RequestID)
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
 	mux.Use(middleware.URLFormat)
+	mux.Use(middleware.RealIP)
 
-	// TODO: А libData сначала понять что это вообще такое, и потом уже понять либо сюда же, либо отдельно
+	mux.Route("/songs", func(r chi.Router) {
+		r.Get("/", handlers.GETAllSongs(storage, logger))
+		r.Get("/{id}", handlers.GETSongText(storage, logger))
 
-	// TODO: установить обработчик на случай, если нет пути
-	mux.Get("/libData", handlers.GETLibData(storage))
+		r.Delete("/{id}", handlers.DELETESong(storage))
 
-	mux.Route("/song", func(r chi.Router) {
-		r.Get("/text", handlers.GETSongText(storage))
+		r.Patch("/{id}", handlers.PATCHSong(storage))
 
-		r.Delete("/delete", handlers.DELETESong(storage))
-
-		r.Patch("/change", handlers.PATCHSong(storage))
-
-		r.Post("/add", handlers.POSTAddNewSong(storage))
+		r.Post("/", handlers.POSTNewSong(storage, externalApiUrl))
 	})
 
 	return mux

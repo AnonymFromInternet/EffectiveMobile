@@ -1,4 +1,4 @@
-## EffectiveMobile
+## Music Info v.0.0.1
 
 #### To run this project You should first create config file into ./config/your_config_file.yaml
 
