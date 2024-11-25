@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS song (
     id SERIAL PRIMARY KEY,
     name varchar(255) NOT NULL,
-    release_date DATETIME,
+    release_date timestamp,
     artist_id INTEGER,
     song_text varchar(255),
     link varchar(255),

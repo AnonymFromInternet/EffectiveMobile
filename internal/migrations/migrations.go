@@ -16,9 +16,9 @@ func Up(db *sql.DB, upMigrationsPath string) {
 	for _, file := range files {
 		fileName := file.Name()
 		if strings.HasSuffix(fileName, ".sql") {
-			migration, e := os.ReadFile(fileName)
+			migration, e := os.ReadFile(upMigrationsPath + "/" + fileName)
 			if e != nil {
-				log.Fatalf("package migrations.Up: cannot read migration file with name %s", fileName)
+				log.Fatalf("package migrations.Up: cannot read migration file with name %s %s", fileName, e)
 			}
 
 			_, e = db.Exec(string(migration))
@@ -29,7 +29,7 @@ func Up(db *sql.DB, upMigrationsPath string) {
 	}
 }
 
-// For feature usage
+// For future usage
 func Down(db *sql.DB, downMigrationsPath string) error {
 	return nil
 }

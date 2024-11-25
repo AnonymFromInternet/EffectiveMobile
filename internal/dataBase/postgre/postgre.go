@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/AnonymFromInternet/EffectiveMobile/internal/filter"
+	loggerPackage "github.com/AnonymFromInternet/EffectiveMobile/internal/logger"
 	"github.com/AnonymFromInternet/EffectiveMobile/internal/migrations"
 	"github.com/AnonymFromInternet/EffectiveMobile/internal/models"
 	_ "github.com/lib/pq"
@@ -19,7 +20,7 @@ type Storage struct {
 func MustCreate(dataSourceName string, logger *slog.Logger, upMigrationPath string) *Storage {
 	dbConnection, e := sql.Open("postgres", dataSourceName)
 	if e != nil {
-		logger.Error("package postgre.MustCreate: cannot create dbConnection")
+		logger.Error("package postgre.MustCreate: cannot create dbConnection", loggerPackage.WrapError(e))
 		log.Fatal("package postgre.MustCreate: cannot create dbConnection")
 	}
 
