@@ -33,7 +33,7 @@ func MustCreate(mode string) *slog.Logger {
 	}
 
 	if logger == nil {
-		log.Fatal("logger is not setted")
+		log.Fatal("logger is not set")
 	}
 
 	return logger

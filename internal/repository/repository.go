@@ -6,7 +6,8 @@ import (
 )
 
 type Repository interface {
-	GetSongs(filter filter.Filter) ([]models.Song, error)
+	GetSongs() ([]models.Song, error)
+	GetSongsFiltered(filter filter.Filter) ([]models.Song, error)
 	GetSongText(id int, f filter.Filter) (string, error)
 	DeleteSong(id int) error
 	ChangeSong(id int, changedSong models.Song) error

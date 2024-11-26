@@ -31,11 +31,12 @@ func getResponse(status int, e bool, songs []models.Song, message string) respon
 	}
 }
 
-func GETAllSongs(storage repository.Repository, logger *slog.Logger) func(w http.ResponseWriter, r *http.Request) {
+func GETAllSongsX(storage repository.Repository, logger *slog.Logger) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		filterType := chi.URLParam(r, "filterType")
-		filterValue := chi.URLParam(r, "filterValue")
-		skip := chi.URLParam(r, "skip")
+		filterType := r.URL.Query().Get("filterType")
+		filterValue := r.URL.Query().Get("filterValue")
+		skip := r.URL.Query().Get("skip")
+		rows := r.URL.Query().Get("rows")
 		skipAsInt, e := strconv.Atoi(skip)
 		if e != nil {
 			logger.Error("package handlers.GETAllSongs: cannot parse skip into int ", loggerPackage.WrapError(e))
@@ -43,7 +44,6 @@ func GETAllSongs(storage repository.Repository, logger *slog.Logger) func(w http
 			return
 		}
 
-		rows := chi.URLParam(r, "rows")
 		rowsAsInt, e := strconv.Atoi(rows)
 		if e != nil {
 			logger.Error("package handlers.GETAllSongs: cannot parse rows amount into int ", loggerPackage.WrapError(e))
@@ -57,18 +57,18 @@ func GETAllSongs(storage repository.Repository, logger *slog.Logger) func(w http
 			Skip   int
 			Rows   int
 		}{}
-
-		if !filter.IsTypeValid(f) {
-			helpers.SendResponse(w, 400, getResponse(400, true, []models.Song{}, fmt.Sprintf("Cannot use this filter type: %s. See swagger for available values", f.FType)))
-			return
-		}
-
 		f.FType = filterType
 		f.FValue = filterValue
 		f.Skip = skipAsInt
 		f.Rows = rowsAsInt
 
-		songs, e := storage.GetSongs(f)
+		if !filter.IsTypeValid(f) {
+			logger.Debug("package handlers.GETAllSongs: invalid filter type from client", loggerPackage.WrapDebug(f.FType))
+			helpers.SendResponse(w, 400, getResponse(400, true, []models.Song{}, fmt.Sprintf("Cannot use this filter type: %s. See swagger for available values", f.FType)))
+			return
+		}
+
+		songs, e := storage.GetSongsFiltered(f)
 		if e != nil {
 			logger.Error("package handlers.GETAllSongs: cannot get songs from database", loggerPackage.WrapError(e))
 			helpers.SendResponse(w, 500, getResponse(500, true, []models.Song{}, ""))
@@ -76,6 +76,65 @@ func GETAllSongs(storage repository.Repository, logger *slog.Logger) func(w http
 		}
 
 		helpers.SendResponse(w, 200, getResponse(200, false, songs, ""))
+	}
+}
+
+func GETAllSongs(storage repository.Repository, logger *slog.Logger) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		filterType := r.URL.Query().Get("filterType")
+		filterValue := r.URL.Query().Get("filterValue")
+		skip := r.URL.Query().Get("skip")
+		rows := r.URL.Query().Get("rows")
+		skipAsInt, e := strconv.Atoi(skip)
+		if e != nil {
+			logger.Error("package handlers.GETAllSongs: cannot parse skip into int ", loggerPackage.WrapError(e))
+			helpers.SendResponse(w, 500, getResponse(500, true, []models.Song{}, ""))
+			return
+		}
+
+		rowsAsInt, e := strconv.Atoi(rows)
+		if e != nil {
+			logger.Error("package handlers.GETAllSongs: cannot parse rows amount into int ", loggerPackage.WrapError(e))
+			helpers.SendResponse(w, 500, getResponse(500, true, []models.Song{}, ""))
+			return
+		}
+
+		f := struct {
+			FType  string
+			FValue string
+			Skip   int
+			Rows   int
+		}{}
+		f.FType = filterType
+		f.FValue = filterValue
+		f.Skip = skipAsInt
+		f.Rows = rowsAsInt
+
+		if filter.IsClear(f) {
+			songs, e := storage.GetSongs()
+			if e != nil {
+				logger.Error("package handlers.GETAllSongs: cannot get songs from database", loggerPackage.WrapError(e))
+				helpers.SendResponse(w, 500, getResponse(500, true, []models.Song{}, ""))
+				return
+			}
+
+			helpers.SendResponse(w, 200, getResponse(200, false, songs, ""))
+		} else {
+			if !filter.IsTypeValid(f) {
+				logger.Debug("package handlers.GETAllSongs: invalid filter type from client", loggerPackage.WrapDebug(f.FType))
+				helpers.SendResponse(w, 400, getResponse(400, true, []models.Song{}, fmt.Sprintf("Cannot use this filter type: %s. See swagger for available values", f.FType)))
+				return
+			}
+
+			songs, e := storage.GetSongsFiltered(f)
+			if e != nil {
+				logger.Error("package handlers.GETAllSongs: cannot get songs from database", loggerPackage.WrapError(e))
+				helpers.SendResponse(w, 500, getResponse(500, true, []models.Song{}, ""))
+				return
+			}
+
+			helpers.SendResponse(w, 200, getResponse(200, false, songs, ""))
+		}
 	}
 }
 

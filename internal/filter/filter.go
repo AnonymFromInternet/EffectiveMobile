@@ -9,8 +9,12 @@ type Filter struct {
 	Rows   int
 }
 
-func IsEmpty(f Filter) bool {
+func IsTypeEmpty(f Filter) bool {
 	return f.FType == "" && f.FValue == ""
+}
+
+func IsClear(f Filter) bool {
+	return f.FType == "" && f.FValue == "" && f.Rows == 0 && f.Skip == 0
 }
 
 func IsTypeValid(f Filter) bool {

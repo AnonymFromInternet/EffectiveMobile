@@ -2,6 +2,7 @@ package postgre
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"log/slog"
 
@@ -29,29 +30,58 @@ func MustCreate(dataSourceName string, logger *slog.Logger, upMigrationPath stri
 	return &Storage{DB: dbConnection, Logger: logger}
 }
 
-func (s *Storage) GetSongs(f filter.Filter) ([]models.Song, error) {
+func (s *Storage) GetSongsFiltered(f filter.Filter) ([]models.Song, error) {
 	var filterStmt string
-	if !filter.IsEmpty(f) {
-		if f.FType == "group" {
-			filterStmt = ` WHERE a.name=$4`
-		} else {
-			filterStmt += ` WHERE s.$3=$4`
+	if !filter.IsTypeEmpty(f) {
+		switch f.FType {
+		case "name":
+			filterStmt += ` WHERE s.name=$3`
+		case "group":
+			filterStmt += ` WHERE a.group=$3`
+		case "releaseDate":
+			filterStmt += ` WHERE s.releaseDate=$3`
+		case "text":
+			filterStmt += ` WHERE s.text=$3`
+		case "link":
+			filterStmt += ` WHERE s.link=$3`
 		}
+
 	}
 
-	baseStmt := `SELECT s.id, s.name, s.release_date, a.name as group, s.song_text, s.link FROM songs s
+	baseStmt := `SELECT s.id, s.name, s.release_date, a.name as group, s.song_text, s.link FROM song s
 				JOIN artist a
 				ON s.artist_id = a.id
-				LIMIT $1 OFFSET $2
 		`
 
-	finalStmt := baseStmt + filterStmt
+	limitStmt := ` LIMIT $1 OFFSET $2`
+
+	finalStmt := baseStmt + filterStmt + limitStmt
 	stmt, e := s.DB.Prepare(finalStmt)
 	if e != nil {
 		return nil, e
 	}
 
-	rows, e := stmt.Query(f.Rows, f.Skip, f.FType, f.FValue)
+	rows, e := stmt.Query(f.Rows, f.Skip, f.FValue)
+	defer rows.Close()
+	if e != nil {
+		return nil, e
+	}
+
+	var songs []models.Song
+	for rows.Next() {
+		var song models.Song
+		rows.Scan(&song.Id, &song.Name, &song.ReleaseDate, &song.Group, &song.Text, &song.Link)
+		songs = append(songs, song)
+	}
+
+	return songs, nil
+}
+
+func (s *Storage) GetSongs() ([]models.Song, error) {
+	rows, e := s.DB.Query(`SELECT * FROM song s
+				JOIN artist a
+				ON s.artist_id = a.id`)
+	fmt.Println("rows :", rows)
 	defer rows.Close()
 	if e != nil {
 		return nil, e
