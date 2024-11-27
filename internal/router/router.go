@@ -20,14 +20,13 @@ func New(storage repository.Repository, externalApiUrl string, logger *slog.Logg
 
 	mux.Route("/songs", func(r chi.Router) {
 		r.Get("/", handlers.GETAllSongs(storage, logger))
-		r.Get("/filter", handlers.GETAllSongs(storage, logger))
 		r.Get("/{id}", handlers.GETSongText(storage, logger))
 
-		r.Delete("/{id}", handlers.DELETESong(storage))
+		r.Delete("/{id}", handlers.DELETESong(storage, logger))
 
-		r.Patch("/{id}", handlers.PATCHSong(storage))
+		r.Patch("/{id}", handlers.PATCHSong(storage, logger))
 
-		r.Post("/", handlers.POSTNewSong(storage, externalApiUrl))
+		r.Post("/", handlers.POSTNewSong(storage, externalApiUrl, logger))
 	})
 
 	return mux

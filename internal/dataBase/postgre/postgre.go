@@ -97,10 +97,24 @@ func (s *Storage) GetSongs() ([]models.Song, error) {
 	return songs, nil
 }
 
-func (s *Storage) GetSongText(id int, f filter.Filter) (string, error) {
-	// Пагинация по куплетам
-	// Брать также rows и skip
-	return "", nil
+func (s *Storage) GetSongText(id int) (string, error) {
+	stmtText := `SELECT song_text FROM song
+				WHERE id = $1
+			`
+	stmt, e := s.DB.Prepare(stmtText)
+	if e != nil {
+		return "", e
+	}
+
+	res := stmt.QueryRow(id)
+
+	var songText string
+	e = res.Scan(&songText)
+	if e != nil {
+		return "", e
+	}
+
+	return songText, nil
 }
 
 func (s *Storage) DeleteSong(id int) error {
@@ -120,6 +134,43 @@ func (s *Storage) ChangeSong(id int, changedSong models.Song) error {
 	return nil
 }
 
-func (s *Storage) AddSong(song models.Song) error {
+func (s *Storage) AddSong(song models.Song, groupId int) error {
+	stmtText := `INSERT INTO song(name, release_date, artist_id, song_text, link) values($1, $2, $3, $4, $5)`
+
+	stmt, e := s.DB.Prepare(stmtText)
+	if e != nil {
+		return e
+	}
+
+	_, e = stmt.Exec(song.Name, song.ReleaseDate, groupId, song.Text, song.Link)
+	if e != nil {
+		return e
+	}
+
 	return nil
+}
+
+func (s *Storage) GetGroup(name string) (int, error) {
+	basicStmt := `SELECT id from artist WHERE name = $1`
+	stmt, _ := s.DB.Prepare(basicStmt)
+
+	groupId := -1
+	res := stmt.QueryRow(name)
+	e := res.Scan(&groupId)
+
+	return groupId, e
+}
+
+func (s *Storage) AddGroup(name string) (int, error) {
+	basicStmt := `INSERT INTO artist(name) values($1) RETURNING id`
+	stmt, _ := s.DB.Prepare(basicStmt)
+	var id int
+	newGroupId := stmt.QueryRow(name)
+
+	e := newGroupId.Scan(&id)
+	if e != nil {
+		return -1, e
+	}
+
+	return id, nil
 }

@@ -8,8 +8,10 @@ import (
 type Repository interface {
 	GetSongs() ([]models.Song, error)
 	GetSongsFiltered(filter filter.Filter) ([]models.Song, error)
-	GetSongText(id int, f filter.Filter) (string, error)
+	GetSongText(id int) (string, error)
 	DeleteSong(id int) error
 	ChangeSong(id int, changedSong models.Song) error
-	AddSong(song models.Song) error
+	AddSong(song models.Song, groupId int) error
+	GetGroup(name string) (int, error)
+	AddGroup(name string) (int, error)
 }
