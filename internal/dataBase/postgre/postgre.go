@@ -131,6 +131,17 @@ func (s *Storage) DeleteSong(id int) error {
 }
 
 func (s *Storage) ChangeSong(id int, changedSong models.Song) error {
+	stmtText := `UPDATE song SET name = $1, release_date = $2, song_text = $3, link = $4 WHERE id = $5`
+	stmt, e := s.DB.Prepare(stmtText)
+	if e != nil {
+		return e
+	}
+
+	_, e = stmt.Exec(changedSong.Name, changedSong.ReleaseDate, changedSong.Text, changedSong.Link, id)
+	if e != nil {
+		return e
+	}
+
 	return nil
 }
 

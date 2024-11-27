@@ -148,9 +148,8 @@ func PATCHSong(storage repository.Repository, logger *slog.Logger) func(w http.R
 			return
 		}
 
-		// Получить пейлоад
-		var payload models.Song
-		e = json.NewDecoder(r.Body).Decode(&payload)
+		var changedSong models.Song
+		e = json.NewDecoder(r.Body).Decode(&changedSong)
 		defer r.Body.Close()
 		if e != nil {
 			logger.Error("package handlers.PATCHSong: cannot deserialize payload", loggerPackage.WrapError(e))
@@ -158,8 +157,7 @@ func PATCHSong(storage repository.Repository, logger *slog.Logger) func(w http.R
 			return
 		}
 
-		// Вызвать метод базы данных
-		e = storage.ChangeSong(idAsInt, payload)
+		e = storage.ChangeSong(idAsInt, changedSong)
 		if e != nil {
 			logger.Error("package handlers.PATCHSong: cannot change song in database", loggerPackage.WrapError(e))
 			helpers.SendResponse(w, 500, helpers.GetResponse(500, true, []models.Song{}, ""))
